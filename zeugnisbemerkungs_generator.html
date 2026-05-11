@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeugnisbemerkungen-Generator | Realschule Bayern</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: linear-gradient(140deg, rgb(255, 242, 218) 0%, rgb(211, 184, 142) 100%);
+            --bg-secondary: white;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --border-color: #ddd;
+            --input-bg: white;
+            --accent-color: #667eea;
+            --accent-dark: #5568d3;
+        }
+
+        body.dark-mode {
+            --bg-primary: linear-gradient(140deg, rgb(30, 30, 40) 0%, rgb(20, 20, 30) 100%);
+            --bg-secondary: #2a2a3e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --border-color: #444;
+            --input-bg: #3a3a4e;
+            --accent-color: #8b9eff;
+            --accent-dark: #7a8eee;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-primary);
+            transition: background 0.3s ease;
+        }
+
+        .container {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            margin: 0;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 14px;
+        }
+
+        /* Dark Mode Toggle */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent-color);
+        }
+
+        .theme-toggle input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--accent-color);
+        }
+
+        .theme-toggle label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        /* Undo/Redo Buttons */
+        .undo-redo-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .undo-redo-btn {
+            padding: 8px 12px;
+            background: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+
+        .undo-redo-btn:hover:not(:disabled) {
+            border-color: var(--accent-color);
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .undo-redo-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Header Group */
+        .header-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .header-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-item label {
+            margin-bottom: 8px;
+        }
+
+        /* Namensfeld */
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Gender Toggle */
+        .gender-toggle {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .gender-option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .gender-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            margin-right: 8px;
+            accent-color: var(--accent-color);
+        }
+
+        .gender-option label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            user-select: none;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .slider-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            width: 100%;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .slider-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border-color);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            min-width: 150px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .slider-value {
+            min-width: 160px;
+            padding: 8px 12px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--accent-color);
+            font-size: 13px;
+            word-wrap: break-word;
+        }
+
+        /* Templates */
+        .templates-section {
+            background: var(--input-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .templates-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+        }
+
+        .template-btn {
+            padding: 8px 12px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .template-btn:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Checkboxes */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            margin-right: 8px;
+            accent-color: var(--accent-color);
+            flex-shrink: 0;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            user-select: none;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 30px 0;
+        }
+
+        .output-section {
+            background: var(--input-bg);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .output-label {
+            color: var(--accent-color);
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .output-text {
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 6px;
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 120px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .copy-btn {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent-dark);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        .reset-btn {
+            background: var(--input-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+
+        .reset-btn:hover {
+            border-color: var(--accent-color);
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .copy-icon::before {
+            content: "📋";
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 14px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+            font-weight: 600;
+            max-width: 300px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .toast.success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .toast.error {
+            background: #f44336;
+            color: white;
+        }
+
+        .toast.info {
+            background: #2196F3;
+            color: white;
+        }
+
+        .info-text {
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .header-top {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .theme-toggle {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header-group {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .gender-toggle {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .slider-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .slider-wrapper {
+                width: 100%;
+            }
+
+            .slider-value {
+                min-width: 100%;
+            }
+
+            .templates-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .checkbox-group {
+                flex-direction: column;
+            }
+
+            .checkbox-item {
+                width: 100%;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-top">
+            <div>
+                <h1>📝 Zeugnisbemerkungen-Generator</h1>
+                <p class="subtitle">Realschule Bayern | 6. Klasse | Allgemeine Bemerkungen</p>
+            </div>
+            <div class="theme-toggle" onclick="toggleDarkMode()">
+                <input type="checkbox" id="darkModeToggle">
+                <label for="darkModeToggle">🌙 Dark Mode</label>
+            </div>
+        </div>
+
+        <form id="remarkForm">
+            <div class="form-section">
+                <!-- Templates -->
+                <div class="templates-section">
+                    <div class="templates-label">📋 Vorlagen / Beispiele</div>
+                    <div class="templates-grid">
+                        <button type="button" class="template-btn" onclick="loadTemplate('excellent')">Ausgezeichnet</button>
+                        <button type="button" class="template-btn" onclick="loadTemplate('good')">Gut</button>
+                        <button type="button" class="template-btn" onclick="loadTemplate('average')">Durchschnitt</button>
+                        <button type="button" class="template-btn" onclick="loadTemplate('weak')">Schwach</button>
+                        <button type="button" class="template-btn" onclick="loadTemplate('passive')">Passiv</button>
+                        <button type="button" class="template-btn" onclick="loadTemplate('active')">Aktiv</button>
+                    </div>
+                </div>
+
+                <!-- Undo/Redo -->
+                <div class="undo-redo-group">
+                    <button type="button" class="undo-redo-btn" id="undoBtn" onclick="undo()" disabled>↶ Undo</button>
+                    <button type="button" class="undo-redo-btn" id="redoBtn" onclick="redo()" disabled>↷ Redo</button>
+                </div>
+
+                <!-- Header: Name und Geschlecht nebeneinander -->
+                <div class="header-group">
+                    <!-- Namensfeld -->
+                    <div class="header-item">
+                        <label for="studentName">Name des Schülers / der Schülerin</label>
+                        <input type="text" id="studentName" placeholder="z.B. Max Mustermann" onchange="generateRemark()">
+                    </div>
+
+                    <!-- Geschlecht / Gender -->
+                    <div class="header-item">
+                        <label>Geschlecht</label>
+                        <div class="gender-toggle">
+                            <div class="gender-option">
+                                <input type="radio" id="gender_male" name="gender" value="male" checked>
+                                <label for="gender_male">♂ Männlich</label>
+                            </div>
+                            <div class="gender-option">
+                                <input type="radio" id="gender_female" name="gender" value="female">
+                                <label for="gender_female">♀ Weiblich</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Leistung -->
+                <div class="form-group">
+                    <label for="performance">Leistungsniveau</label>
+                    <div class="slider-hint">← Schwach | Mittel | Stark →</div>
+                    <div class="slider-container">
+                        <div class="slider-wrapper">
+                            <input type="range" id="performance" min="0" max="100" value="50" onchange="recordHistory()">
+                        </div>
+                        <div class="slider-value" id="performanceValue">befriedigend</div>
+                    </div>
+                    <p class="info-text">Von schwachen bis ausgezeichneten Leistungen</p>
+                </div>
+
+                <!-- Mitarbeit -->
+                <div class="form-group">
+                    <label for="participation">Mitarbeit und Aufmerksamkeit</label>
+                    <div class="slider-hint">← Passiv | Mittel | Aktiv →</div>
+                    <div class="slider-container">
+                        <div class="slider-wrapper">
+                            <input type="range" id="participation" min="0" max="100" value="50" onchange="recordHistory()">
+                        </div>
+                        <div class="slider-value" id="participationValue">angemessen</div>
+                    </div>
+                    <p class="info-text">Von schwacher bis aktiver Mitarbeit</p>
+                </div>
+
+                <!-- Verhalten -->
+                <div class="form-group">
+                    <label for="behavior">Verhalten</label>
+                    <div class="slider-hint">← Problematisch | Mittel | Vorbildlich →</div>
+                    <div class="slider-container">
+                        <div class="slider-wrapper">
+                            <input type="range" id="behavior" min="0" max="100" value="50" onchange="recordHistory()">
+                        </div>
+                        <div class="slider-value" id="behaviorValue">angemessen</div>
+                    </div>
+                    <p class="info-text">Von problematisch bis vorbildlich</p>
+                </div>
+
+                <!-- Selbstständiges Arbeiten -->
+                <div class="form-group">
+                    <label for="independence">Selbstständiges Arbeiten</label>
+                    <div class="slider-hint">← Abhängig | Mittel | Selbstständig →</div>
+                    <div class="slider-container">
+                        <div class="slider-wrapper">
+                            <input type="range" id="independence" min="0" max="100" value="50" onchange="recordHistory()">
+                        </div>
+                        <div class="slider-value" id="independenceValue">teils eigenständig</div>
+                    </div>
+                    <p class="info-text">Bewertung der Eigenständigkeit beim Arbeiten</p>
+                </div>
+
+                <!-- Selbstregulation -->
+                <div class="form-group">
+                    <label for="selfRegulation">Selbstregulation</label>
+                    <div class="slider-hint">← Schwach | Mittel | Stark →</div>
+                    <div class="slider-container">
+                        <div class="slider-wrapper">
+                            <input type="range" id="selfRegulation" min="0" max="100" value="50" onchange="recordHistory()">
+                        </div>
+                        <div class="slider-value" id="selfRegulationValue">angemessen</div>
+                    </div>
+                    <p class="info-text">Von schwacher bis ausgeprägter Selbstregulation</p>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="form-section">
+                <!-- Sozialkompetenz -->
+                <div class="form-group">
+                    <label>Sozialkompetenz (mehrere Aspekte wählbar)</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="social_teamfaehig" value="zeigt hervorragende Teamfähigkeit">
+                            <label for="social_teamfaehig">Hervorragende Teamfähigkeit</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="social_kooperativ" value="arbeitet kooperativ">
+                            <label for="social_kooperativ">Kooperativ</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="social_hilfsbereit" value="ist hilfsbereit">
+                            <label for="social_hilfsbereit">Hilfsbereit</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="social_ruecksichtsvoll" value="zeigt Rücksicht">
+                            <label for="social_ruecksichtsvoll">Rücksichtsvoll</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="social_zuverlässig_partner" value="ist ein zuverlässiger Partner">
+                            <label for="social_zuverlässig_partner">Zuverlässiger Partner</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="social_respektvoll" value="behandelt andere respektvoll">
+                            <label for="social_respektvoll">Respektvoll</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="social_empathisch" value="zeigt Empathie">
+                            <label for="social_empathisch">Empathisch</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="social_konfliktloesend" value="löst Konflikte konstruktiv">
+                            <label for="social_konfliktloesend">Konfliktlösung konstruktiv</label>
+                        </div>
+                    </div>
+                    <p class="info-text">Wählen Sie ein oder mehrere passende Aspekte</p>
+                </div>
+
+                <!-- Zuverlässigkeit -->
+                <div class="form-group">
+                    <label>Zuverlässigkeit (mehrere Aspekte wählbar)</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="reliability_gewissenhaft" value="ist sehr gewissenhaft">
+                            <label for="reliability_gewissenhaft">Sehr gewissenhaft</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="reliability_zuverlässig" value="ist zuverlässig">
+                            <label for="reliability_zuverlässig">Zuverlässig</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="reliability_puenktlich" value="ist pünktlich">
+                            <label for="reliability_puenktlich">Pünktlich</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="reliability_ordnung" value="hält Ordnung">
+                            <label for="reliability_ordnung">Ordentlich</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="reliability_hausaufgaben" value="macht gewissenhaft Hausaufgaben">
+                            <label for="reliability_hausaufgaben">Gewissenhafte Hausaufgaben</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="reliability_sorgfaeltig" value="arbeitet sorgfältig">
+                            <label for="reliability_sorgfaeltig">Sorgfältig</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="reliability_verantwortung" value="übernimmt Verantwortung">
+                            <label for="reliability_verantwortung">Verantwortungsvoll</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="reliability_absprachen" value="hält Absprachen ein">
+                            <label for="reliability_absprachen">Hält Absprachen ein</label>
+                        </div>
+                    </div>
+                    <p class="info-text">Wählen Sie ein oder mehrere passende Aspekte</p>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Output -->
+            <div class="output-section">
+                <div class="output-label">Generierte Zeugnisbemerkung</div>
+                <div class="output-text" id="output">
+                    Bitte füllen Sie das Formular aus, um eine Bemerkung zu generieren.
+                </div>
+                <div class="button-group">
+                    <button type="button" class="reset-btn" onclick="resetForm()">Zurücksetzen</button>
+                    <button type="button" class="copy-btn copy-icon" onclick="copyToClipboard()">In Zwischenablage kopieren</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // ============================================
+        // DARK MODE
+        // ============================================
+        function toggleDarkMode() {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
+            const toggle = document.getElementById('darkModeToggle');
+            toggle.checked = isDarkMode;
+            localStorage.setItem('darkMode', isDarkMode);
+        }
+
+        // Load dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('darkModeToggle').checked = true;
+        }
+
+        // ============================================
+        // TOAST NOTIFICATIONS
+        // ============================================
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ============================================
+        // UNDO/REDO HISTORY
+        // ============================================
+        let history = [];
+        let historyIndex = -1;
+
+        function saveState() {
+            return {
+                performance: document.getElementById('performance').value,
+                participation: document.getElementById('participation').value,
+                behavior: document.getElementById('behavior').value,
+                independence: document.getElementById('independence').value,
+                selfRegulation: document.getElementById('selfRegulation').value
+            };
+        }
+
+        function restoreState(state) {
+            document.getElementById('performance').value = state.performance;
+            document.getElementById('participation').value = state.participation;
+            document.getElementById('behavior').value = state.behavior;
+            document.getElementById('independence').value = state.independence;
+            document.getElementById('selfRegulation').value = state.selfRegulation;
+
+            updateAllSliderValues();
+            generateRemark();
+            updateUndoRedoButtons();
+        }
+
+        function recordHistory() {
+            // Remove any forward history if we're not at the end
+            history = history.slice(0, historyIndex + 1);
+            
+            const state = saveState();
+            history.push(state);
+            historyIndex++;
+
+            // Limit history to 50 states
+            if (history.length > 50) {
+                history.shift();
+                historyIndex--;
+            }
+
+            updateUndoRedoButtons();
+            generateRemark();
+        }
+
+        function undo() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                restoreState(history[historyIndex]);
+                showToast('↶ Undo ausgeführt', 'info');
+            }
+        }
+
+        function redo() {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                restoreState(history[historyIndex]);
+                showToast('↷ Redo ausgeführt', 'info');
+            }
+        }
+
+        function updateUndoRedoButtons() {
+            document.getElementById('undoBtn').disabled = historyIndex <= 0;
+            document.getElementById('redoBtn').disabled = historyIndex >= history.length - 1;
+        }
+
+        // Initialize history
+        history.push(saveState());
+        historyIndex = 0;
+
+        // ============================================
+        // TEMPLATES
+        // ============================================
+        const templates = {
+            excellent: {
+                performance: 90,
+                participation: 95,
+                behavior: 95,
+                independence: 90,
+                selfRegulation: 95,
+                social: ['social_teamfaehig', 'social_kooperativ', 'social_empathisch'],
+                reliability: ['reliability_gewissenhaft', 'reliability_zuverlässig', 'reliability_verantwortung']
+            },
+            good: {
+                performance: 75,
+                participation: 80,
+                behavior: 75,
+                independence: 75,
+                selfRegulation: 75,
+                social: ['social_kooperativ', 'social_hilfsbereit'],
+                reliability: ['reliability_zuverlässig', 'reliability_sorgfaeltig']
+            },
+            average: {
+                performance: 50,
+                participation: 50,
+                behavior: 50,
+                independence: 50,
+                selfRegulation: 50,
+                social: ['social_kooperativ'],
+                reliability: ['reliability_zuverlässig']
+            },
+            weak: {
+                performance: 25,
+                participation: 30,
+                behavior: 35,
+                independence: 25,
+                selfRegulation: 30,
+                social: ['social_kooperativ'],
+                reliability: ['reliability_puenktlich']
+            },
+            passive: {
+                performance: 40,
+                participation: 20,
+                behavior: 50,
+                independence: 40,
+                selfRegulation: 45,
+                social: ['social_kooperativ'],
+                reliability: ['reliability_zuverlässig']
+            },
+            active: {
+                performance: 80,
+                participation: 90,
+                behavior: 80,
+                independence: 85,
+                selfRegulation: 85,
+                social: ['social_teamfaehig', 'social_kooperativ', 'social_hilfsbereit'],
+                reliability: ['reliability_gewissenhaft', 'reliability_zuverlässig']
+            }
+        };
+
+        function loadTemplate(templateName) {
+            const template = templates[templateName];
+            if (!template) {
+                showToast('Template nicht gefunden', 'error');
+                return;
+            }
+
+            // Set sliders
+            document.getElementById('performance').value = template.performance;
+            document.getElementById('participation').value = template.participation;
+            document.getElementById('behavior').value = template.behavior;
+            document.getElementById('independence').value = template.independence;
+            document.getElementById('selfRegulation').value = template.selfRegulation;
+
+            // Uncheck all checkboxes
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+            // Check selected checkboxes
+            template.social.forEach(id => {
+                const cb = document.getElementById(id);
+                if (cb) cb.checked = true;
+            });
+            template.reliability.forEach(id => {
+                const cb = document.getElementById(id);
+                if (cb) cb.checked = true;
+            });
+
+            updateAllSliderValues();
+            recordHistory();
+            showToast(`Template "${templateName}" geladen`, 'info');
+        }
+
+        // ============================================
+        // GENDER VARIABLE
+        // ============================================
+        let currentGender = 'male';
+
+        document.querySelectorAll('input[name="gender"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                currentGender = this.value;
+                generateRemark();
+            });
+        });
+
+        // ============================================
+        // PRONOMEN NACH GESCHLECHT
+        // ============================================
+        function getPronoun(pronoun) {
+            const pronounMap = {
+                male: {
+                    'ihr/sein': 'sein',
+                    'ihren/seinen': 'seinen',
+                    'ihre/seine': 'seine',
+                    'ihr/ihm': 'ihm'
+                },
+                female: {
+                    'ihr/sein': 'ihr',
+                    'ihren/seinen': 'ihren',
+                    'ihre/seine': 'ihre',
+                    'ihr/ihm': 'ihr'
+                }
+            };
+            return pronounMap[currentGender][pronoun];
+        }
+
+        // ============================================
+        // MAPPING FÜR LEISTUNGSNIVEAU (17 Stufen)
+        // ============================================
+        const performanceMap = {
+            0: "fehlend",
+            6: "unzureichend",
+            12: "limitiert",
+            18: "gering",
+            24: "schwächer",
+            30: "schwach",
+            36: "ausreichend",
+            42: "solide",
+            48: "angemessen",
+            54: "durchschnittlich",
+            60: "befriedigend",
+            66: "leistungsstark",
+            72: "überdurchschnittlich",
+            78: "gut",
+            84: "sehr gut",
+            90: "hervorragend",
+            100: "ausgezeichnet"
+        };
+
+        const performanceText = {
+            "fehlend": "zeigt erhebliche und grundlegende Lücken in {ihren/seinen} Leistungen",
+            "unzureichend": "zeigt erhebliche Lücken in {ihren/seinen} Leistungen",
+            "limitiert": "erfüllt die Anforderungen in sehr eingeschränktem Maße",
+            "gering": "erfüllt die Anforderungen nur in geringem Maße",
+            "schwächer": "erfüllt die Anforderungen eher schwächer",
+            "schwach": "erfüllt die Anforderungen schwach",
+            "ausreichend": "erfüllt die Anforderungen nur teilweise",
+            "solide": "erfüllt die Anforderungen solide",
+            "angemessen": "erfüllt die Anforderungen in angemessenem Maße",
+            "durchschnittlich": "erfüllt die Anforderungen durchschnittlich",
+            "befriedigend": "erfüllt die Anforderungen im Allgemeinen in befriedigendem Maße",
+            "leistungsstark": "zeigt leistungsstarke Fähigkeiten",
+            "überdurchschnittlich": "erfüllt die Anforderungen überdurchschnittlich",
+            "gut": "erfüllt die Anforderungen gut",
+            "sehr gut": "erfüllt die Anforderungen sehr gut",
+            "hervorragend": "erfüllt die Anforderungen in hervorragender Weise",
+            "ausgezeichnet": "erfüllt die Anforderungen in ausgezeichneter Weise"
+        };
+
+        // ============================================
+        // MAPPING FÜR MITARBEIT (29 Stufen)
+        // ============================================
+        const participationMap = {
+            0: "mangelhaft",
+            4: "unzureichend",
+            8: "nachlässig",
+            12: "unmotiviert",
+            16: "desinteressiert",
+            20: "unkonzentriert",
+            24: "unaufmerksam",
+            28: "kaum beteiligt",
+            32: "wenig beteiligt",
+            36: "passiv",
+            40: "situativ engagiert",
+            44: "teilweise aufmerksam",
+            48: "unregelmäßig",
+            52: "wechselhaft",
+            56: "phasenweise beteiligt",
+            60: "gelegentlich beteiligt",
+            64: "ausreichend",
+            68: "angemessen",
+            72: "verantwortungsvoll",
+            76: "motiviert",
+            80: "zuverlässig",
+            84: "gewissenhaft",
+            88: "regelmäßig beteiligt",
+            92: "interessiert",
+            96: "beteiligt",
+            97: "konzentriert",
+            98: "aufmerksam",
+            99: "engagiert",
+            100: "aktiv"
+        };
+
+        const participationText = {
+            "mangelhaft": "beteiligt sich mangelhaft am Unterricht",
+            "unzureichend": "beteiligt sich unzureichend am Unterricht",
+            "nachlässig": "beteiligt sich nachlässig am Unterricht",
+            "unmotiviert": "beteiligt sich unmotiviert am Unterricht",
+            "desinteressiert": "zeigt Desinteresse am Unterricht",
+            "unkonzentriert": "ist beim Unterricht unkonzentriert",
+            "unaufmerksam": "ist beim Unterricht unaufmerksam",
+            "kaum beteiligt": "beteiligt sich kaum am Unterricht",
+            "wenig beteiligt": "beteiligt sich wenig am Unterricht",
+            "passiv": "beteiligt sich passiv am Unterricht",
+            "situativ engagiert": "zeigt situativ engagierte Mitarbeit",
+            "teilweise aufmerksam": "ist teilweise aufmerksam im Unterricht",
+            "unregelmäßig": "beteiligt sich unregelmäßig am Unterricht",
+            "wechselhaft": "zeigt wechselhafte Mitarbeit",
+            "phasenweise beteiligt": "beteiligt sich phasenweise am Unterricht",
+            "gelegentlich beteiligt": "beteiligt sich gelegentlich am Unterricht",
+            "ausreichend": "beteiligt sich ausreichend am Unterricht",
+            "angemessen": "beteiligt sich in angemessenem Maße am Unterricht",
+            "verantwortungsvoll": "beteiligt sich verantwortungsvoll am Unterricht",
+            "motiviert": "zeigt motivierte Mitarbeit",
+            "zuverlässig": "beteiligt sich zuverlässig am Unterricht",
+            "gewissenhaft": "beteiligt sich gewissenhaft am Unterricht",
+            "regelmäßig beteiligt": "beteiligt sich regelmäßig am Unterricht",
+            "interessiert": "beteiligt sich interessiert am Unterricht",
+            "beteiligt": "beteiligt sich beteiligt am Unterricht",
+            "konzentriert": "ist konzentriert und aufmerksam im Unterricht",
+            "aufmerksam": "ist aufmerksam im Unterricht",
+            "engagiert": "beteiligt sich engagiert am Unterricht",
+            "aktiv": "beteiligt sich aktiv am Unterricht"
+        };
+
+        // ============================================
+        // MAPPING FÜR VERHALTEN (34 Stufen)
+        // ============================================
+        const behaviorMap = {
+            0: "disziplinlos",
+            3: "unbefriedigend",
+            6: "mangelhaft",
+            9: "eigenwillig",
+            12: "impulsiv",
+            15: "aggressiv",
+            18: "respektlos",
+            21: "unverträglich",
+            24: "unzuverlässig",
+            27: "unaufmerksam",
+            30: "unruhig",
+            33: "störend",
+            36: "aufsässig",
+            39: "gelegentlich auffällig",
+            42: "phasenweise angepasst",
+            45: "sozial kompetent",
+            48: "verträglich",
+            51: "ordnungsgemäß",
+            54: "unauffällig",
+            57: "ausreichend",
+            60: "angemessen",
+            63: "angepasst",
+            66: "selbstbewusst",
+            69: "diszipliniert",
+            72: "friedlich",
+            75: "kooperativ",
+            78: "hilfsbereit",
+            81: "rücksichtsvoll",
+            84: "respektvoll",
+            87: "verantwortungsvoll",
+            90: "gewissenhaft",
+            93: "zuverlässig",
+            96: "tadellos",
+            100: "vorbildlich"
+        };
+
+        const behaviorText = {
+            "disziplinlos": "{ihr/sein} Verhalten ist disziplinlos",
+            "unbefriedigend": "{ihr/sein} Verhalten ist unbefriedigend",
+            "mangelhaft": "{ihr/sein} Verhalten ist mangelhaft",
+            "eigenwillig": "zeigt eigenwilliges Verhalten",
+            "impulsiv": "{ihr/sein} Verhalten ist impulsiv",
+            "aggressiv": "{ihr/sein} Verhalten ist aggressiv",
+            "respektlos": "zeigt respektloses Verhalten",
+            "unverträglich": "{ihr/sein} Verhalten ist unverträglich",
+            "unzuverlässig": "ist verhaltensbedingt unzuverlässig",
+            "unaufmerksam": "ist verhaltensbedingt unaufmerksam",
+            "unruhig": "ist verhaltensbedingt unruhig",
+            "störend": "{ihr/sein} Verhalten ist störend",
+            "aufsässig": "zeigt aufsässiges Verhalten",
+            "gelegentlich auffällig": "ist gelegentlich verhaltensauffällig",
+            "phasenweise angepasst": "ist phasenweise angepasst",
+            "sozial kompetent": "zeigt soziale Kompetenz",
+            "verträglich": "{ihr/sein} Verhalten ist verträglich",
+            "ordnungsgemäß": "hält sich ordnungsgemäß",
+            "unauffällig": "{ihr/sein} Verhalten ist unauffällig",
+            "ausreichend": "{ihr/sein} Verhalten ist ausreichend",
+            "angemessen": "{ihr/sein} Verhalten ist angemessen",
+            "angepasst": "{ihr/sein} Verhalten ist angepasst",
+            "selbstbewusst": "zeigt selbstbewusstes Verhalten",
+            "diszipliniert": "{ihr/sein} Verhalten ist diszipliniert",
+            "friedlich": "verhält sich friedlich",
+            "kooperativ": "zeigt kooperatives Verhalten",
+            "hilfsbereit": "ist hilfsbereit",
+            "rücksichtsvoll": "zeigt Rücksichtsnahme",
+            "respektvoll": "verhält sich respektvoll",
+            "verantwortungsvoll": "zeigt verantwortungsvolles Verhalten",
+            "gewissenhaft": "ist gewissenhaft im Verhalten",
+            "zuverlässig": "ist zuverlässig",
+            "tadellos": "{ihr/sein} Verhalten ist tadellos",
+            "vorbildlich": "{ihr/sein} Verhalten ist vorbildlich"
+        };
+
+        // ============================================
+        // MAPPING FÜR SELBSTSTÄNDIGES ARBEITEN
+        // ============================================
+        const independenceMap = {
+            0: "stark abhängig",
+            20: "wenig eigenständig",
+            40: "teils eigenständig",
+            60: "weitgehend eigenständig",
+            80: "sehr eigenständig",
+            100: "ausgesprochen eigenständig"
+        };
+
+        const independenceText = {
+            "stark abhängig": "arbeitet sehr abhängig von Hilfe und Anleitung",
+            "wenig eigenständig": "arbeitet noch nicht sehr eigenständig",
+            "teils eigenständig": "arbeitet teils eigenständig",
+            "weitgehend eigenständig": "arbeitet weitgehend eigenständig",
+            "sehr eigenständig": "arbeitet sehr eigenständig und zuverlässig",
+            "ausgesprochen eigenständig": "arbeitet ausgesprochen eigenständig und verantwortungsvoll"
+        };
+
+        // ============================================
+        // MAPPING FÜR SELBSTREGULATION (36 Stufen)
+        // ============================================
+        const selfRegulationMap = {
+            0: "mangelhaft",
+            3: "unzuverlässig",
+            6: "unreflektiert",
+            9: "unflexibel",
+            12: "unmotiviert",
+            15: "unausdauernd",
+            18: "flüchtig",
+            21: "nachlässig",
+            24: "desorganisiert",
+            27: "unstrukturiert",
+            30: "impulsiv",
+            33: "abhängig",
+            36: "unselbstständig",
+            39: "wechselhaft motiviert",
+            42: "manchmal reflektiert",
+            45: "variable Anstrengungsbereitschaft",
+            48: "mit Unterstützung selbstständig",
+            51: "teilweise organisiert",
+            54: "phasenweise zielgerichtet",
+            57: "gelegentlich selbstständig",
+            60: "ausreichend",
+            63: "angemessen",
+            66: "flexibel",
+            69: "geduldig",
+            72: "motiviert",
+            75: "verlässlich",
+            78: "gewissenhaft",
+            81: "diszipliniert",
+            84: "organisiert",
+            87: "strukturiert",
+            90: "zielgerichtet",
+            93: "ausdauernd",
+            96: "selbstreflektiv",
+            98: "reflektiert",
+            99: "eigenverantwortlich",
+            100: "selbstständig"
+        };
+
+        const selfRegulationText = {
+            "mangelhaft": "zeigt mangelnde Selbstregulation",
+            "unzuverlässig": "ist bei der Selbstregulation unzuverlässig",
+            "unreflektiert": "zeigt unreflektiertes Verhalten",
+            "unflexibel": "ist in {ihren/seinen} Handlungsweise unflexibel",
+            "unmotiviert": "zeigt wenig Motivation zur Selbstregulation",
+            "unausdauernd": "ist wenig ausdauernd",
+            "flüchtig": "arbeitet flüchtig und ungenau",
+            "nachlässig": "arbeitet nachlässig",
+            "desorganisiert": "zeigt desorganisiertes Verhalten",
+            "unstrukturiert": "arbeitet unstrukturiert",
+            "impulsiv": "handelt impulsiv",
+            "abhängig": "ist in {ihren/seinen} Handlungsfähigkeit abhängig",
+            "unselbstständig": "ist unselbstständig",
+            "wechselhaft motiviert": "zeigt wechselhaft motiviertes Verhalten",
+            "manchmal reflektiert": "reflektiert manchmal {ihr/sein} Handeln",
+            "variable Anstrengungsbereitschaft": "zeigt variable Anstrengungsbereitschaft",
+            "mit Unterstützung selbstständig": "ist mit Unterstützung selbstständig",
+            "teilweise organisiert": "zeigt teilweise organisiertes Verhalten",
+            "phasenweise zielgerichtet": "arbeitet phasenweise zielgerichtet",
+            "gelegentlich selbstständig": "ist gelegentlich selbstständig",
+            "ausreichend": "reguliert {ihre/seine} Gefühle und Verhalten ausreichend",
+            "angemessen": "zeigt angemessene Selbstregulation",
+            "flexibel": "zeigt flexible Handlungsfähigkeit",
+            "geduldig": "zeigt Geduld",
+            "motiviert": "ist motiviert",
+            "verlässlich": "ist verlässlich",
+            "gewissenhaft": "arbeitet gewissenhaft",
+            "diszipliniert": "zeigt disziplinierteres Verhalten",
+            "organisiert": "ist organisiert",
+            "strukturiert": "arbeitet strukturiert",
+            "zielgerichtet": "arbeitet zielgerichtet",
+            "ausdauernd": "ist ausdauernd",
+            "selbstreflektiv": "zeigt selbstreflektive Haltung",
+            "reflektiert": "reguliert {ihre/seine} Gefühle und Verhalten reflektiert",
+            "eigenverantwortlich": "zeigt eigenverantwortliches Verhalten",
+            "selbstständig": "zeigt ausgeprägte Selbstregulation und Eigenverantwortlichkeit"
+        };
+
+        // ============================================
+        // EVENT LISTENER FÜR SLIDER
+        // ============================================
+        document.getElementById('performance').addEventListener('input', function() {
+            updateSliderValue(this, 'performanceValue', performanceMap);
+            generateRemark();
+        });
+
+        document.getElementById('participation').addEventListener('input', function() {
+            updateSliderValue(this, 'participationValue', participationMap);
+            generateRemark();
+        });
+
+        document.getElementById('behavior').addEventListener('input', function() {
+            updateSliderValue(this, 'behaviorValue', behaviorMap);
+            generateRemark();
+        });
+
+        document.getElementById('independence').addEventListener('input', function() {
+            updateSliderValue(this, 'independenceValue', independenceMap);
+            generateRemark();
+        });
+
+        document.getElementById('selfRegulation').addEventListener('input', function() {
+            updateSliderValue(this, 'selfRegulationValue', selfRegulationMap);
+            generateRemark();
+        });
+
+        // Event Listener für Checkboxen
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', generateRemark);
+        });
+
+        // ============================================
+        // HILFSFUNKTIONEN
+        // ============================================
+
+        function updateSliderValue(slider, displayId, map) {
+            const value = parseInt(slider.value);
+            let closest = 0;
+            let minDiff = Math.abs(value - 0);
+
+            for (let key in map) {
+                let diff = Math.abs(value - key);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closest = key;
+                }
+            }
+
+            document.getElementById(displayId).textContent = map[closest];
+        }
+
+        function updateAllSliderValues() {
+            updateSliderValue(document.getElementById('performance'), 'performanceValue', performanceMap);
+            updateSliderValue(document.getElementById('participation'), 'participationValue', participationMap);
+            updateSliderValue(document.getElementById('behavior'), 'behaviorValue', behaviorMap);
+            updateSliderValue(document.getElementById('independence'), 'independenceValue', independenceMap);
+            updateSliderValue(document.getElementById('selfRegulation'), 'selfRegulationValue', selfRegulationMap);
+        }
+
+        function getSelectedCheckboxes(prefix) {
+            const selected = [];
+            document.querySelectorAll(`input[id^="${prefix}"]`).forEach(checkbox => {
+                if (checkbox.checked) {
+                    selected.push(checkbox.value);
+                }
+            });
+            return selected;
+        }
+
+        function getSliderCategory(value, map) {
+            value = parseInt(value);
+            let closest = 0;
+            let minDiff = Math.abs(value - 0);
+
+            for (let key in map) {
+                let diff = Math.abs(value - key);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closest = key;
+                }
+            }
+
+            return map[closest];
+        }
+
+        function replacePronouns(text) {
+            return text
+                .replace(/{ihr\/sein}/g, getPronoun('ihr/sein'))
+                .replace(/{ihren\/seinen}/g, getPronoun('ihren/seinen'))
+                .replace(/{ihre\/seine}/g, getPronoun('ihre/seine'))
+                .replace(/{ihr\/ihm}/g, getPronoun('ihr/ihm'));
+        }
+
+        // ============================================
+        // BEMERKUNGSGENERIERUNG
+        // ============================================
+
+        function generateRemark() {
+            const studentName = document.getElementById('studentName').value;
+            const performance = getSliderCategory(document.getElementById('performance').value, performanceMap);
+            const participation = getSliderCategory(document.getElementById('participation').value, participationMap);
+            const behavior = getSliderCategory(document.getElementById('behavior').value, behaviorMap);
+            const independence = getSliderCategory(document.getElementById('independence').value, independenceMap);
+            const selfRegulation = getSliderCategory(document.getElementById('selfRegulation').value, selfRegulationMap);
+            
+            const socialCompetencies = getSelectedCheckboxes('social_');
+            const reliabilities = getSelectedCheckboxes('reliability_');
+            
+            const output = document.getElementById('output');
+
+            // Validierung
+            if (socialCompetencies.length === 0 || reliabilities.length === 0) {
+                output.textContent = "Bitte wählen Sie mindestens einen Aspekt bei Sozialkompetenz und Zuverlässigkeit aus.";
+                return;
+            }
+
+            // Name oder Platzhalter
+            const nameDisplay = studentName.trim() !== '' ? studentName : '[...]';
+
+            // Bemerkung zusammenstellen IN DIESER REIHENFOLGE:
+            // 1. Leistung + Mitarbeit
+            let remark = `${nameDisplay} ${participationText[participation]} und ${performanceText[performance]}. `;
+            
+            // 2. Selbstständiges Arbeiten
+            remark += `${independenceText[independence]}. `;
+            
+            // 3. Selbstregulation
+            remark += `${selfRegulationText[selfRegulation]}. `;
+            
+            // 4. Sozialkompetenz
+            if (socialCompetencies.length > 0) {
+                const socialStr = socialCompetencies.join(", ").replace(/,([^,]*)$/, " und$1");
+                remark += `Im Bereich der Sozialkompetenz ${socialStr}. `;
+            }
+            
+            // 5. Zuverlässigkeit
+            if (reliabilities.length > 0) {
+                const reliabilityStr = reliabilities.join(", ").replace(/,([^,]*)$/, " und$1");
+                remark += `Bezüglich der Zuverlässigkeit ${reliabilityStr}.`;
+            }
+            
+            // 6. Verhalten
+            remark += ` ${behaviorText[behavior]}.`;
+
+            // Pronomen ersetzen
+            remark = replacePronouns(remark);
+
+            output.textContent = remark;
+        }
+
+        // ============================================
+        // COPY & RESET FUNKTIONEN
+        // ============================================
+
+        function copyToClipboard() {
+            const text = document.getElementById('output').textContent;
+            
+            if (text.includes("Bitte wählen Sie")) {
+                showToast('Bitte füllen Sie zuerst Sozialkompetenz und Zuverlässigkeit aus', 'error');
+                return;
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('✓ In Zwischenablage kopiert!', 'success');
+            }).catch(() => {
+                showToast('Fehler beim Kopieren. Bitte manuell kopieren.', 'error');
+            });
+        }
+
+        function resetForm() {
+            document.getElementById('remarkForm').reset();
+            document.getElementById('output').textContent = "Bitte füllen Sie das Formular aus, um eine Bemerkung zu generieren.";
+            document.getElementById('performanceValue').textContent = "befriedigend";
+            document.getElementById('participationValue').textContent = "angemessen";
+            document.getElementById('behaviorValue').textContent = "angemessen";
+            document.getElementById('independenceValue').textContent = "teils eigenständig";
+            document.getElementById('selfRegulationValue').textContent = "angemessen";
+            currentGender = 'male';
+            
+            // Reset history
+            history = [saveState()];
+            historyIndex = 0;
+            updateUndoRedoButtons();
+            
+            showToast('Formular zurückgesetzt', 'info');
+        }
+    </script>
+</body>
+</html>
